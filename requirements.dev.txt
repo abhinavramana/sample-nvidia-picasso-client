@@ -1,4 +1,0 @@
-# dev specific requirements
--r ./requirements.txt
-pytest==7.4.0
-pytest-xdist==3.5.0
