@@ -30,10 +30,12 @@ def initialize_nvidia_service() -> NvidiaImageGenerationTaskHandler:
 class BootupManager:
     def __init__(self):
         self.nvidia_task_handler: NvidiaImageGenerationTaskHandler = None
-        self.perform_bootup()
 
     def perform_bootup(self):
         self.nvidia_task_handler = initialize_nvidia_service()
+
+    async def perform_shutdown(self):
+        await self.nvidia_task_handler.close()
 
 
 IMMUTABLE_BOOTUP_MANAGER = BootupManager()

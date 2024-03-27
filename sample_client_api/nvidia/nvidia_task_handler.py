@@ -23,6 +23,9 @@ class NvidiaImageGenerationTaskHandler:
     def __init__(self, nvcf_url: str, auth_config: NvidiaAuthConfig):
         self.nvidia_client = NvidiaImageGenerationClient(nvcf_url, auth_config)
 
+    async def close(self):
+        await self.nvidia_client.close()
+
     async def handle_nvidia_task(
         self,
         nvidia_client_request: NvidiaRequest,

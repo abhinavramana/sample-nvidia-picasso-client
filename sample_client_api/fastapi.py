@@ -34,6 +34,8 @@ def get_basic_fastapi_app() -> FastAPI:
     fast_app = FastAPI(**opts)
     logger.info("FastAPI is up and running ...")
     log_environment_configs()
+    fast_app.add_event_handler(event_type="shutdown",
+                               func=IMMUTABLE_BOOTUP_MANAGER.perform_shutdown)
     return fast_app
 
 

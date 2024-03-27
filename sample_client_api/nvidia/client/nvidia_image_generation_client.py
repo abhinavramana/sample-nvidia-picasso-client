@@ -34,6 +34,8 @@ from sample_client_api.nvidia.client.nvidia_response_handler import (
 )
 from sample_client_api.nvidia.nvidia_token_manager import NvidiaAuthConfig, NvidiaAuthTokenManager
 
+NVCF_POLL_SECONDS = 60  # valid range is 0-300 seconds
+
 logger = get_logger_for_file(__name__)
 
 
@@ -55,10 +57,6 @@ NVIDIA_FUNCTION_POLLING_STATUSES = {
     NvidiaFunctionResponseStatus.PENDING_EVALUATION.value,
     NvidiaFunctionResponseStatus.IN_PROGRESS.value,
 }
-
-
-class Invalid302ResponseException(Exception):
-    pass
 
 
 class InvalidNvidiaPollParamsException(Exception):
@@ -121,12 +119,18 @@ class NvidiaImageGenerationClient:
         logger.info("Initializing NvidiaImageGenerationClient...")
         self.token_manager = NvidiaAuthTokenManager(auth_config)
         self.endpoint = f"{nvcf_url}/v2/nvcf"
-        self.asset_handler = NvidiaAssetClient(self.token_manager, self.endpoint)
+        self.asset_handler = NvidiaAssetClient(self.token_manager,
+                                               self.endpoint)
+        self.client_session = aiohttp.ClientSession(
+                connector=aiohttp.TCPConnector(limit=0,
+                                               enable_cleanup_closed=True))
+
+    async def close(self):
+        await self.client_session.close()
 
     # Invoke a function
     async def nvidia_post_call(
         self,
-        session: aiohttp.ClientSession,
         token: str,
         nvidia_request: NvidiaRequest,
         task_id: str,
@@ -134,33 +138,32 @@ class NvidiaImageGenerationClient:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {token}",
+            "NVCF-POLL-SECONDS": NVCF_POLL_SECONDS,
         }
 
         nvidia_function = nvidia_request.function_id
         nvcf_function_inputs = nvidia_request.parameters
         data = {
-            "requestBody": {
-                "inputs": [
-                    process_parameter(name, parameter)
-                    for name, parameter in nvcf_function_inputs.items()
-                    if parameter is not None
-                    and (
-                        not isinstance(parameter, NvidiaRequestParameter)
-                        or parameter.value is not None
-                    )
-                ],
-                "outputs": [
-                    {
-                        "name": nvidia_request.image_output_name,
-                        "datatype": "BYTES",
-                        "shape": [1],
-                    }
-                ],
-            },
+            "inputs": [
+                process_parameter(name, parameter)
+                for name, parameter in nvcf_function_inputs.items()
+                if parameter is not None
+                   and (
+                           not isinstance(parameter, NvidiaRequestParameter)
+                           or parameter.value is not None
+                   )
+            ],
+            "outputs": [
+                {
+                    "name": nvidia_request.image_output_name,
+                    "datatype": "BYTES",
+                    "shape": [1],
+                }
+            ],
         }
 
         if nvidia_request.profile_output_name:
-            data["requestBody"]["outputs"].append(
+            data["outputs"].append(
                 {
                     "name": nvidia_request.profile_output_name,
                     "datatype": "BYTES",
@@ -169,14 +172,14 @@ class NvidiaImageGenerationClient:
             )
 
         assets, data = await self.asset_handler.handle_assets(
-            session, nvidia_request, token, data
+            self.client_session, nvidia_request, token, data
         )
 
         try:
             payload = json.dumps(data)
-            post_url = f"{self.endpoint}/exec/functions/{nvidia_function}"
+            post_url = f"{self.endpoint}/pexec/functions/{nvidia_function}"
             logger.info(f"Sending {task_id} to {post_url} with payload: {payload}")
-            async with session.post(
+            async with self.client_session.post(
                 post_url,
                 headers=headers,
                 data=payload,
@@ -200,37 +203,30 @@ class NvidiaImageGenerationClient:
                 return response, assets
         except Exception as e:
             # If we fail, handle cleaning assets before returning
-            await self.asset_handler.cleanup_assets(session, assets, token)
+            await self.asset_handler.cleanup_assets(self.client_session, assets, token)
             raise e
 
     async def get_request_status_by_id(
         self,
-        session: aiohttp.ClientSession,
         req_id: Optional[str] = None,
         token: Optional[str] = None,
-        get_url: Optional[str] = None,
     ) -> ClientResponse:
-        if get_url is None and req_id is None:
-            raise Invalid302ResponseException(
-                "Received 302 but no Location header was present"
-            )
-        if get_url and req_id:
+        if req_id is None:
             raise InvalidNvidiaPollParamsException(
-                "Only one of req_id or get_url can be provided"
+                "Received 202 but no request id header was present"
             )
-        token = await self.token_manager.fetch_token_if_required(session, token)
-        headers = {"Authorization": f"Bearer {token}"}
-        if get_url is None:
-            get_url = f"{self.endpoint}/exec/status/{req_id}"
+        token = await self.token_manager.fetch_token_if_required(self.client_session, token)
+        headers = {"Authorization": f"Bearer {token}",
+                   "NVCF-POLL-SECONDS": NVCF_POLL_SECONDS}
+        get_url = f"{self.endpoint}/pexec/status/{req_id}"
 
-        async with session.get(get_url, headers=headers) as response:
-            await response.json()
+        async with self.client_session.get(get_url, headers=headers) as response:
+            await response.read()  # may be a 302, which has no json body
 
             return response
 
     async def handle_response(
         self,
-        session: aiohttp.ClientSession,
         response: ClientResponse,
         nvidia_request: NvidiaRequest,
         task_id: str,
@@ -239,36 +235,27 @@ class NvidiaImageGenerationClient:
     ) -> Tuple[bytes, List[Any]]:
         num_requests: int = 0  # The number of times we have polled for the request
         while num_requests <= config.NVCF_MAX_POLLING_ATTEMPTS:
-            # https://developer.nvidia.com/docs/picasso/user-guide/latest/cloud-function/status.html#http-status-code
-            if response.status == 302:  # Handle redirect 302
-                location_url = response.headers.get("Location")
-                response = await self.get_request_status_by_id(
-                    session, None, token, location_url
-                )
-
-            elif response.status == 200:
-                # Parse the response
-                res_json = await response.json()
-                req_id = res_json["reqId"]
-
+            if response.status == 200 or response.status == 302:
+                req_id = response.headers.get("NVCF-REQID")
                 logger.info(
                     f"task_id: {task_id} req_id: {req_id} fulfilled in {num_requests} polls"
                 )
                 # if there is a responseReference, we need to get the image from the URL
                 return await handle_fulfilled_response(
-                    session, res_json, nvidia_request, task_id
+                        self.client_session, response, nvidia_request, task_id,
+                        req_id
                 )
 
             elif response.status == 202:
-                res_json = await response.json()
-                req_id = res_json["reqId"]
+                await response.json()  # drain body for connection reuse
+                req_id = response.headers.get("NVCF-REQID")
                 if num_requests >= config.NVCF_MAX_POLLING_ATTEMPTS:
                     raise NvidiaPollTimeoutException(nvidia_request, task_id, req_id)
                 await explicitly_sleep_for_minimum_polling_interval(last_request_time)
                 logger.info(f"task_id: {task_id} req_id: {req_id} still polling")
                 # poll get_req_by_id until status is fulfilled
                 response = await self.get_request_status_by_id(
-                    session, req_id, token, None
+                    req_id, token
                 )
                 num_requests += 1
                 last_request_time = time.time()
@@ -284,39 +271,37 @@ class NvidiaImageGenerationClient:
     async def generate_image(
         self, nvidia_client_request: NvidiaRequest, task_id: str
     ) -> Optional[Tuple[bytes, List[Any]]]:
-        async with aiohttp.ClientSession() as session:
-            # Get an auth token as Before we make a request, we need to make sure we have a valid auth token
-            token = await self.token_manager.fetch_token_if_required(session)
-            start_time_post = time.time()
-            logger.info(f"Sending {task_id} to {self.endpoint} at {start_time_post}")
+        # Get an auth token as Before we make a request, we need to make sure we have a valid auth token
+        token = await self.token_manager.fetch_token_if_required(self.client_session)
+        start_time_post = time.time()
+        logger.info(f"Sending {task_id} to {self.endpoint} at {start_time_post}")
 
-            # Invoke a function
-            invoke_res, assets = await self.nvidia_post_call(
-                session, token, nvidia_client_request, task_id
+        # Invoke a function
+        invoke_res, assets = await self.nvidia_post_call(
+            token, nvidia_client_request, task_id
+        )
+        poll_start_time = time.time()
+        response = None
+        reason_for_failure = None
+        try:
+            response = await self.handle_response(
+                invoke_res,
+                nvidia_client_request,
+                task_id,
+                poll_start_time,
+                token,
             )
-            poll_start_time = time.time()
-            response = None
-            reason_for_failure = None
-            try:
-                response = await self.handle_response(
-                    session,
-                    invoke_res,
-                    nvidia_client_request,
-                    task_id,
-                    poll_start_time,
-                    token,
-                )
-                time_image_generation = time.time() - start_time_post
-                logger.info(
-                    f"Image generation for {task_id} successful in {time_image_generation} seconds"
-                )
-            except Exception as e:
-                reason_for_failure = str(e)
-                logger.error(
-                    f"Nvidia call failed for {task_id}: {nvidia_client_request} due to {reason_for_failure}",
-                    exc_info=True,
-                )
+            time_image_generation = time.time() - start_time_post
+            logger.info(
+                f"Image generation for {task_id} successful in {time_image_generation} seconds"
+            )
+        except Exception as e:
+            reason_for_failure = str(e)
+            logger.error(
+                f"Nvidia call failed for {task_id}: {nvidia_client_request} due to {reason_for_failure}",
+                exc_info=True,
+            )
 
-            await self.asset_handler.cleanup_assets(session, assets, token)
+        await self.asset_handler.cleanup_assets(self.client_session, assets, token)
 
         return response, reason_for_failure
