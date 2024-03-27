@@ -20,12 +20,11 @@ def always_json_parsing_adjustment(request: Request):
     request._headers = Headers(raw=new_header)
 
 
-class WOMBOAPIRoute(APIRoute):
+class CustomFastAPIRouter(APIRoute):
     def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
         original_route_handler = super().get_route_handler()
 
         async def custom_route_handler(request: Request):
-            # Any custom logic that is specific to WOMBO's API routes
             # Manage the content-type header for backward compatibility
             always_json_parsing_adjustment(request)
             return await original_route_handler(request)

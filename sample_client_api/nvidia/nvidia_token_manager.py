@@ -73,8 +73,6 @@ class NvidiaAuthTokenManager:
     async def get_auth_token(self, session: aiohttp.ClientSession) -> str:
         request = session.request(
             "POST",
-            # TODO: nvidia_client_secret should also be retrieved from secrets manager dynamically so that we dont have to redeploy the service
-            # https://linear.app/wombo/issue/BAK-221
             auth=BasicAuth(
                 self.nvidia_auth_config.nvidia_username,
                 self.nvidia_auth_config.nvidia_client_secret,

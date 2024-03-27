@@ -8,7 +8,7 @@ from aiohttp import ClientResponse
 from sample_client_api.log_handling import get_logger_for_file
 
 from sample_client_api import config
-from sample_client_api.config import NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION
+from sample_client_api.config import NVCF_SDXL_DIFFUSION_FUNCTION_ID
 from sample_client_api.nvidia.client.nvidia_asset_client import (
     NvidiaAssetClient,
     is_response_status_valid,
@@ -89,7 +89,7 @@ def check_nsfw_exception(nvidia_request, task_id, status, exception_reason):
             raise NSFWRejectionFaceswapException(
                 nvidia_request, task_id, "", status, exception_reason
             )
-        if nvidia_request.function_id == NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION:
+        if nvidia_request.function_id == NVCF_SDXL_DIFFUSION_FUNCTION_ID:
             raise NSFWRejectionSDXLException(
                 nvidia_request, task_id, "", status, exception_reason
             )

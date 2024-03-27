@@ -5,7 +5,7 @@ from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
 """
 ***************************************************************************************************
-ALERT: THIS FILE SHOULD NEVER CONTAIN ANY WOMBO PACKAGE IMPORTS
+ALERT: THIS FILE SHOULD NEVER CONTAIN ANY PACKAGE IMPORTS
 
 This should never be taken out of the basic init because this is the first thing that should
 be initialized even before the imports

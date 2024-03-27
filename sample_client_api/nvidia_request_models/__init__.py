@@ -11,11 +11,6 @@ class ImageInput(BaseModel):
     weight: float
 
 
-@unique
-class AvailableWatermarks(Enum):
-    WOMBOT = "wombot"
-
-
 class BaseTextToImageTask(BaseModel):
     id: UUID
     # Prompt settings
@@ -27,8 +22,6 @@ class BaseTextToImageTask(BaseModel):
     desired_final_width: int
     input_image_input: Optional[ImageInput] = None
     mask_image_input: Optional[ImageInput] = None
-
-    watermark: Optional[AvailableWatermarks] = None
 
     output_s3_bucket: str
     # Images will be stored in the bucket in the format {output_s3_key_prefix}/{task_id}/{1,2,3,Final}.jpg

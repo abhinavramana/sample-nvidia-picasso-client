@@ -2,14 +2,14 @@ from typing import Any, Callable
 from fastapi import APIRouter as FastAPIRouter
 from fastapi.types import DecoratedCallable
 
-from sample_client_api.custom_api_route import WOMBOAPIRoute
+from sample_client_api.custom_api_route import CustomFastAPIRouter
 
 
-class WOMBOAPIRouter(FastAPIRouter):
+class CustomAPIRouter(FastAPIRouter):
     def __init__(self, **kwargs):
         if "route_class" not in kwargs:
-            kwargs["route_class"] = WOMBOAPIRoute
-        super(WOMBOAPIRouter, self).__init__(**kwargs)
+            kwargs["route_class"] = CustomFastAPIRouter
+        super(CustomAPIRouter, self).__init__(**kwargs)
 
     def api_route(
         self, path: str, *, include_in_schema: bool = True, **kwargs: Any

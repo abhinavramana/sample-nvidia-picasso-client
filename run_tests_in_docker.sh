@@ -9,4 +9,3 @@ DOCKER_BUILDKIT=1 docker build -f Dockerfile.test --ssh default -t api-tests:dev
 sudo chmod 777 /var/run/docker.sock
 docker run --network="host" --user postgres -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp --env-file test.env api-tests:dev
 # # Add a volume for testing image/video generation output
-# # -v /Users/maximepeabody/Documents/wombo/test_output:/test_output

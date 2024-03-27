@@ -2,4 +2,3 @@
 -r ./requirements.txt
 pytest==7.4.0
 pytest-xdist==3.5.0
-git+ssh://git@github.com/womboai/wombo-test-utilities.git@5.1.0#egg=wombo_test_utilities

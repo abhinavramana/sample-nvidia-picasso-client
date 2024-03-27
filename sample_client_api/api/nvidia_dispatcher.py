@@ -2,10 +2,10 @@ from sample_client_api.api.network_models import (
     NvidiaOutput,
 )
 from sample_client_api.config import (
-    NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION,
+    NVCF_SDXL_DIFFUSION_FUNCTION_ID,
     NVCF_UPSCALER_FUNCTION_ID,
 )
-from sample_client_api.custom_router import WOMBOAPIRouter
+from sample_client_api.custom_router import CustomAPIRouter
 from sample_client_api.nvidia.nvidia_multi_client_request import multi_client_request
 from sample_client_api.nvidia.nvidia_service import (
     process_image_to_image,
@@ -31,7 +31,7 @@ from sample_client_api.nvidia_request_models.final_models import (
     DiffusionNvidiaClientRequest,
 )
 
-nvidia_dispatcher = WOMBOAPIRouter()
+nvidia_dispatcher = CustomAPIRouter()
 
 
 @nvidia_dispatcher.post("/txt2img", response_model=NvidiaOutput)
@@ -88,7 +88,7 @@ async def sdxl_diffusion(
     return await handle_request(
         request,
         lambda r: process_diffusion(
-            r, NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION
+            r, NVCF_SDXL_DIFFUSION_FUNCTION_ID
         ),
     )
 
