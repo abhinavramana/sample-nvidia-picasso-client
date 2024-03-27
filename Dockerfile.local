@@ -22,8 +22,6 @@ COPY requirements.txt ./
 RUN pip3 install --upgrade setuptools pip
 RUN --mount=type=ssh pip3 install --ignore-installed --no-cache-dir -r requirements.txt
 
-# Takes care of all packages needed for open-telemetry
-RUN opentelemetry-bootstrap --action=install
 
 #SECOND LAYER: Only get dependencies from compilation time
 FROM python:3.10.10-slim as prod-image

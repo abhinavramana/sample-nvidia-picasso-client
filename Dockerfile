@@ -37,5 +37,4 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY nvidia-picasso ./
 
 # Need to do this as follows, maybe we have to migrate to use gunicorn within fastapi.py programmatically
-# Uvicorn can't be used because https://github.com/open-telemetry/opentelemetry-python-contrib/issues/385#issuecomment-1199088668
 CMD gunicorn sample_client_api.fastapi:app --workers 4 --worker-class uvicorn.workers.UvicornH11Worker --bind 0.0.0.0:8000
