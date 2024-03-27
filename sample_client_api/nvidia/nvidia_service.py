@@ -149,13 +149,9 @@ async def handle_request(
         client_request: T, request_factory: Callable[[T], NvidiaRequest]
 ):
     request = request_factory(client_request)
-    metric_attributes = {
-        "task": request_factory.__name__,
-        "model": client_request.model,
-    }
 
     result = await IMMUTABLE_BOOTUP_MANAGER.nvidia_task_handler.handle_nvidia_task(
-        request, client_request.task_id, metric_attributes
+        request, client_request.task_id
     )
 
     (file, outputs) = result
@@ -173,10 +169,9 @@ async def handle_request(
 async def handle_custom_request(
         request: NvidiaRequest,
         task_id: str,
-        metric_attributes: Optional[Dict[str, str]] = None,
 ):
     result = await IMMUTABLE_BOOTUP_MANAGER.nvidia_task_handler.handle_nvidia_task(
-        request, task_id, metric_attributes
+        request, task_id
     )
 
     (file, _) = result

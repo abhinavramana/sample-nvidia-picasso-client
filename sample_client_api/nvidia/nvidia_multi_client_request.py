@@ -17,12 +17,8 @@ async def multi_client_request(request: GuidanceNvidiaClientRequest) -> BytesIO:
     original_requested_width = request.width
     original_requested_height = request.height
     picasso_request_text2img = process_text_to_image(request)
-    metric_attributes = {
-        "task": "txt2img",
-        "model": request.model,
-    }
     generated_image_small = await handle_custom_request(
-        picasso_request_text2img, request.task_id, metric_attributes
+        picasso_request_text2img, request.task_id
     )
 
     async def base_asset():
