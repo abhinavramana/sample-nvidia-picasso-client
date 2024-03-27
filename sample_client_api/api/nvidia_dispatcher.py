@@ -16,8 +16,6 @@ from wombo_utilities.interface.nvidia.nvidia_request_models import (
 
 from wombo.api.network_models import (
     NvidiaOutput,
-    NicheImageBitTensorT2IRequest,
-    NicheImageBitTensorT2IOutput,
 )
 from wombo.bootup.auth import verify_token
 from wombo.config import (

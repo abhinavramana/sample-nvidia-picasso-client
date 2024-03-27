@@ -29,7 +29,6 @@ from wombo_utilities.interface.nvidia.nvidia_request_models import (
 from wombo import config
 from wombo.api.network_models import (
     NvidiaOutput,
-    WomboBitTensorT2IRequest,
 )
 from wombo.bootup.nvidia_objects import IMMUTABLE_BOOTUP_MANAGER
 from wombo.config import (
