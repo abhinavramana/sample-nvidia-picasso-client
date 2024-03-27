@@ -3,7 +3,7 @@ from typing import Optional, Dict, Tuple, List, Any
 
 from fastapi import HTTPException
 from starlette import status
-from wombo_utilities import get_logger_for_file
+from sample_client_api.log_handling import get_logger_for_file
 
 from sample_client_api.metrics import (
     failed_tasks_counter,

@@ -1,139 +1,80 @@
-from enum import Enum
-from typing import Optional
-
-from pydantic import Field, BaseModel
-
-from wombo_utilities.interface.art_inference.text_to_image_tasks import (
-    ImageInput,
-    DiffusionStyleParams,
-)
+from uuid import UUID
+from enum import Enum, unique
+from typing import Optional, List
+from pydantic import field_validator, BaseModel
+from datetime import datetime
 
 
-class BaseNvidiaClientRequest(BaseModel):
-    model: Optional[str] = None
-    task_id: str
-    s3_output_bucket: Optional[str] = None
-    s3_output_key: Optional[str] = None
+class ImageInput(BaseModel):
+    image_bucket: str
+    image_key: str
+    weight: float
 
 
-class NvidiaClientRequest(BaseNvidiaClientRequest):
-    prompt: str
-    width: int
-    height: int
-    negative_prompt: Optional[str] = None
-    seed: Optional[int] = None
+@unique
+class AvailableWatermarks(Enum):
+    WOMBOT = "wombot"
 
 
-class NoDimensionNvidiaClientRequest(BaseNvidiaClientRequest):
-    prompt: str
-    negative_prompt: Optional[str] = None
-    seed: Optional[int] = None
-
-
-class NvidiaScheduler(Enum):
-    PNDM = "PNDM"
-    LMSD = "LMSD"
-    DPM = "DPM"
-    DDIM = "DDIM"
-    EulerA = "EulerA"
-
-
-class GuidanceNvidiaClientRequest(NvidiaClientRequest):
-    guidance: Optional[float] = Field(
-        ge=0.0, le=40.0, default=None
-    )  # txt2image, image2image
-
-
-class NoDimensionGuidanceNvidiaClientRequest(NoDimensionNvidiaClientRequest):
-    guidance: Optional[float] = Field(
-        ge=0.0, le=40.0, default=None
-    )  # txt2image, image2image
-
-
-class StepsNvidiaClientRequest(NvidiaClientRequest):
-    steps: Optional[int] = Field(ge=0, le=100, default=None)
-
-
-class NoDimensionStepsNvidiaClientRequest(NoDimensionNvidiaClientRequest):
-    steps: Optional[int] = Field(ge=0, le=100, default=None)
-
-
-class SDXLNvidiaClientRequest(GuidanceNvidiaClientRequest):
-    batch_size: Optional[int] = None
-    base_steps: Optional[int] = 30
-    refiner_steps: Optional[int] = 10
-    scheduler: Optional[NvidiaScheduler] = None
-
-
-class ImageNvidiaClientRequest(NvidiaClientRequest):
-    image: ImageInput  # instructpix, image2image
-
-
-class ImageToImageNvidiaClientRequest(
-    GuidanceNvidiaClientRequest, ImageNvidiaClientRequest
-):
-    pass
-
-
-class TextToVideoNvidiaClientRequest(GuidanceNvidiaClientRequest):
-    num_frames: int = Field(default=30, ge=1, le=65535)
-
-
-class InpaintNvidiaClientRequest(NvidiaClientRequest):
-    input_image: ImageInput
-    input_mask: ImageInput
-
-
-class InstructNvidiaClientRequest(ImageNvidiaClientRequest):
-    image_guidance: Optional[float] = Field(default=1.5, ge=1.0, le=32767.0)
-
-
-class FaceswapNvidiaClientRequest(
-    NoDimensionGuidanceNvidiaClientRequest, NoDimensionStepsNvidiaClientRequest
-):
-    source_image: ImageInput
-    target_image: ImageInput
-    input_image_strength: float = 0.3
-    do_ip_adapter: bool = True
-    ip_scale: Optional[float] = 0.3
-    face_index: Optional[int] = 0
+class BaseTextToImageTask(BaseModel):
+    id: UUID
+    # Prompt settings
+    user_prompt: str = ""
     allow_nsfw: bool = False
-    img_nsfw_threshold: float = 0.9
-
-
-class DiffusionNvidiaClientRequest(BaseNvidiaClientRequest):
-    user_prompt: str
-    desired_final_width: int
+    image_nsfw_threshold: float = 0.5
+    # Generation settings
     desired_final_height: int
+    desired_final_width: int
+    input_image_input: Optional[ImageInput] = None
+    mask_image_input: Optional[ImageInput] = None
 
-    style_params: DiffusionStyleParams
+    watermark: Optional[AvailableWatermarks] = None
 
-    allow_nsfw: bool = False
+    output_s3_bucket: str
+    # Images will be stored in the bucket in the format {output_s3_key_prefix}/{task_id}/{1,2,3,Final}.jpg
+    output_s3_key_prefix: str
+    # Each style may even specify very "internal" model parameters but not always.
+    # We do not want the defaults for these fields to lie on the API side, to allow
+    # ML folks to rapidly experiment and modify the defaults on their own cluster.
+    # Thus, these values are "Optional" if not specified by the style config. These
+    # are specified in the child classes.
     seed: Optional[int] = None
+    created_at: datetime
+    # This is used to put the base image uri to be accessible. Note that we are not using simple s3 key
+    # because it can be used across projects with different s3 buckets. So keep it flexible
+    base_generated_image_uri: Optional[str] = None
 
-    input_image: Optional[ImageInput] = None
-    mask_image: Optional[ImageInput] = None
-
-
-class FaceswapIpNvidiaClientRequest(
-    GuidanceNvidiaClientRequest, StepsNvidiaClientRequest
-):
-    checkpoint: str
-
-    enable_high_resolution_resample: bool = False
-    high_resolution_resample_scale_factor: float = 1.5
-    high_resolution_resample_steps: int = 20
-    high_resolution_resample_strength: float = 0.5
-    high_resolution_resample_ip_scale: float = 0.5
-    high_resolution_resample_guidance_scale: float = 1.0
-
-    enable_gfpgan: bool = True
-
-    ip_image: ImageInput
-    target_image: Optional[ImageInput] = None
-    allow_nsfw: bool = False
-    img_nsfw_threshold: float = 0.9
+    @field_validator("watermark")
+    @classmethod
+    def enum_to_value(cls, v):
+        # This ensures that the overall task is serializable when converted to dict by the API
+        # worker to send down the task queue.
+        return v.value if v is not None else None
 
 
-class AvatarNvidiaClientRequest(GuidanceNvidiaClientRequest, StepsNvidiaClientRequest):
-    source_image: ImageInput
+class DiffusionStyleParams(BaseModel):
+    prompt_template: str = "%"
+    text_cfg: Optional[float] = None
+    steps_override: Optional[int] = None
+    uncond_prompt: Optional[str] = None
+    # Internal SD height/width
+    height: Optional[int] = None  # UNUSED, remove this param eventually
+    width: Optional[int] = None  # UNUSED, remove this param eventually
+    # Diffusion params
+    nrow: int = 2
+    sd_cfg_scale: Optional[float] = None
+    sd_cfg_scale_start: Optional[float] = None  # UNUSED, remove this param eventually
+    sd_cfg_scale_end: Optional[float] = None  # UNUSED, remove this param eventually
+    model: Optional[str] = None
+    # Scheduler params
+    t2i_scheduler: Optional[str] = None
+    t2i_scheduler_steps: Optional[int] = None
+    i2i_scheduler: Optional[str] = None
+    i2i_scheduler_steps: Optional[int] = None
+    instruct_scheduler: Optional[str] = None
+    instruct_scheduler_steps: Optional[int] = None
+    ddim_eta: Optional[float] = None
+
+
+class DiffusionTextToImageTask(BaseTextToImageTask):
+    style_params: DiffusionStyleParams

@@ -5,9 +5,9 @@ from typing import Optional, Dict, Any, List, Tuple
 
 import aiohttp
 from aiohttp import ClientResponse
-from wombo_utilities import get_logger_for_file
+from sample_client_api.log_handling import get_logger_for_file
 
-from wombo import config
+from sample_client_api import config
 from sample_client_api.config import NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION
 from sample_client_api.nvidia.client.nvidia_asset_client import (
     NvidiaAssetClient,

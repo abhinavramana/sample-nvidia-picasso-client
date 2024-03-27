@@ -6,9 +6,9 @@ from typing import Optional, Dict, Any, Callable, Awaitable
 import PIL
 from PIL.Image import Image
 from pydantic import BaseModel, ConfigDict
-from wombo_utilities import get_logger_for_file
+from sample_client_api.log_handling import get_logger_for_file
 
-from wombo import config
+from sample_client_api import config
 from sample_client_api.nvidia import MIME_JPEG_CONTENT_TYPE
 
 log = get_logger_for_file(__name__)

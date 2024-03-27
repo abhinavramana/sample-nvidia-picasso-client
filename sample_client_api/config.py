@@ -1,6 +1,9 @@
 import os
 
-from wombo_utilities.interface import get_boolean_from_os
+
+def get_boolean_from_os(key: str, default_value: bool = False):
+    return os.getenv(key, str(default_value)).lower() == "true"
+
 
 API_DOCS_ENDPOINT = os.getenv(
     "API_DOCS_ENDPOINT", "/docs"

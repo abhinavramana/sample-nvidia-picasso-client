@@ -1,9 +1,9 @@
 from math import floor, ceil
 from typing import Tuple
 
-from wombo_utilities import get_logger_for_file
+from sample_client_api.log_handling import get_logger_for_file
 
-from wombo import config
+from sample_client_api import config
 from sample_client_api.model_constants import SD_V1_4, SD_V1_5, INSTRUCT
 from sample_client_api.synth.synth_defaults import DIFFUSION_RES_DIVISOR
 

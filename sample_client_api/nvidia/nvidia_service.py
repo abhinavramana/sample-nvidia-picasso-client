@@ -1,32 +1,15 @@
 import asyncio
-import base64
 import io
-from typing import Tuple, Optional, TypeVar, Callable, Dict
 import json
+from typing import Tuple, Optional, TypeVar, Callable, Dict
 
 import PIL
 import aioboto3
 import numpy
 import numpy as np
-from fastapi import HTTPException
 from pydantic import BaseModel
-from starlette import status
-from wombo_utilities import get_logger_for_file
-from wombo_utilities.interface.art_inference.text_to_image_tasks import ImageInput
-from sample_client_api.nvidia_request_models import (
-    NvidiaClientRequest,
-    InstructNvidiaClientRequest,
-    InpaintNvidiaClientRequest,
-    ImageToImageNvidiaClientRequest,
-    GuidanceNvidiaClientRequest,
-    FaceswapNvidiaClientRequest,
-    FaceswapIpNvidiaClientRequest,
-    AvatarNvidiaClientRequest,
-    DiffusionNvidiaClientRequest,
-    BaseNvidiaClientRequest,
-)
 
-from wombo import config
+from sample_client_api import config
 from sample_client_api.api.network_models import (
     NvidiaOutput,
 )
@@ -39,6 +22,7 @@ from sample_client_api.config import (
     NVCF_FACESWAP_IP_FUNCTION_ID,
     NVCF_AVATAR_FUNCTION_ID,
 )
+from sample_client_api.log_handling import get_logger_for_file
 from sample_client_api.model_constants import SD_XL_0_9
 from sample_client_api.nvidia.client.nvidia_request import (
     NvidiaRequest,
@@ -47,6 +31,18 @@ from sample_client_api.nvidia.client.nvidia_request import (
     NvidiaRequestParameter,
     AssetLoader,
     asset_from_image,
+)
+from sample_client_api.nvidia_request_models.final_models import (
+    NvidiaClientRequest,
+    InstructNvidiaClientRequest,
+    InpaintNvidiaClientRequest,
+    ImageToImageNvidiaClientRequest,
+    GuidanceNvidiaClientRequest,
+    FaceswapNvidiaClientRequest,
+    FaceswapIpNvidiaClientRequest,
+    AvatarNvidiaClientRequest,
+    DiffusionNvidiaClientRequest,
+    BaseNvidiaClientRequest,
 )
 from sample_client_api.synth.synth_defaults import (
     SDXL_BASE_STEPS,

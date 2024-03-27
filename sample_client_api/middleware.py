@@ -6,7 +6,7 @@ from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import ClientDisconnect
 from starlette.responses import JSONResponse
-from wombo_utilities import get_logger_for_file
+from sample_client_api.log_handling import get_logger_for_file
 
 logger = get_logger_for_file(__name__)
 

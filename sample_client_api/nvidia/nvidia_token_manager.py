@@ -5,11 +5,7 @@ import aiohttp
 import jwt
 from aiohttp import BasicAuth
 from pydantic import BaseModel
-from wombo_utilities import get_logger_for_file
-from wombo_utilities.api_utilities.ip_address_retrieval import (
-    get_global_ip,
-    get_local_ip,
-)
+from sample_client_api.log_handling import get_logger_for_file
 
 logger = get_logger_for_file(__name__)
 
@@ -35,13 +31,7 @@ class NvidiaAuthConfig(BaseModel):
 class NvidiaAuthTokenManager:
 
     def __init__(self, nvidia_auth_config: NvidiaAuthConfig):
-        self.global_ip = (
-            get_global_ip()
-        )  # This can change if the server is behind a load balancer
-        self.local_ip = get_local_ip()  # Doesn't change till bootup
-        logger.info(
-            f"Initializing NvidiaTokenManager with GlobalIP: {self.global_ip}, LocalIP: {self.local_ip}"
-        )
+
         self.nvidia_auth_config = nvidia_auth_config
         self.headers = {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -81,10 +71,6 @@ class NvidiaAuthTokenManager:
         return self.token
 
     async def get_auth_token(self, session: aiohttp.ClientSession) -> str:
-        self.global_ip = get_global_ip()
-        logger.info(
-            f"Getting new auth token for GlobalIP: {self.global_ip}, LocalIP: {self.local_ip}"
-        )
         request = session.request(
             "POST",
             # TODO: nvidia_client_secret should also be retrieved from secrets manager dynamically so that we dont have to redeploy the service

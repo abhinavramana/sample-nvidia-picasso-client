@@ -1,7 +1,7 @@
 from io import BytesIO
 
-from wombo_utilities import get_logger_for_file
-from sample_client_api.nvidia_request_models import (
+from sample_client_api.log_handling import get_logger_for_file
+from sample_client_api.nvidia_request_models.final_models import (
     GuidanceNvidiaClientRequest,
 )
 

@@ -6,9 +6,9 @@ import zipfile
 from typing import List, Tuple, Any
 
 import aiohttp
-from wombo_utilities import get_logger_for_file
+from sample_client_api.log_handling import get_logger_for_file
 
-from wombo import config
+from sample_client_api import config
 from sample_client_api.nvidia.client.nvidia_request import NvidiaRequest
 
 logger = get_logger_for_file(__name__)
