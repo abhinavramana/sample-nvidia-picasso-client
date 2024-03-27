@@ -5,8 +5,8 @@ from typing import Dict, Any, List
 import aiohttp
 from wombo_utilities import get_logger_for_file
 
-from wombo.nvidia.client.nvidia_request import NvidiaRequest, AssetLoader
-from wombo.nvidia.nvidia_token_manager import NvidiaAuthTokenManager
+from sample_client_api.nvidia.client.nvidia_request import NvidiaRequest, AssetLoader
+from sample_client_api.nvidia.nvidia_token_manager import NvidiaAuthTokenManager
 
 logger = get_logger_for_file(__name__)
 

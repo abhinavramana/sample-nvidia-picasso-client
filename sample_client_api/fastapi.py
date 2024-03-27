@@ -4,10 +4,10 @@ from fastapi import FastAPI
 from starlette.middleware import Middleware
 from wombo_utilities import get_logger_for_file
 from wombo import config
-from wombo.api.nvidia_dispatcher import nvidia_dispatcher
-from wombo.bootup.nvidia_objects import IMMUTABLE_BOOTUP_MANAGER
-from wombo.log_secret_configs import log_environment_configs
-from wombo.middleware import LoggingMiddleware
+from sample_client_apiapi.nvidia_dispatcher import nvidia_dispatcher
+from sample_client_api.bootup.nvidia_objects import IMMUTABLE_BOOTUP_MANAGER
+from sample_client_api.log_secret_configs import log_environment_configs
+from sample_client_api.middleware import LoggingMiddleware
 
 logger = get_logger_for_file(__name__)
 

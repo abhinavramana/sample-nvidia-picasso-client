@@ -1,14 +1,14 @@
 from io import BytesIO
 
 from wombo_utilities import get_logger_for_file
-from wombo_utilities.interface.nvidia.nvidia_request_models import (
+from sample_client_api.nvidia_request_models import (
     GuidanceNvidiaClientRequest,
 )
 
-from wombo.config import NVCF_UPSCALER_FUNCTION_ID
-from wombo.nvidia import MIME_JPEG_CONTENT_TYPE
-from wombo.nvidia.client.nvidia_request import NvidiaRequest, asset_from_bytes, NvidiaRequestParameter
-from wombo.nvidia.nvidia_service import process_text_to_image, handle_custom_request
+from sample_client_api.config import NVCF_UPSCALER_FUNCTION_ID
+from sample_client_api.nvidia import MIME_JPEG_CONTENT_TYPE
+from sample_client_api.nvidia.client.nvidia_request import NvidiaRequest, asset_from_bytes, NvidiaRequestParameter
+from sample_client_api.nvidia.nvidia_service import process_text_to_image, handle_custom_request
 
 logger = get_logger_for_file(__name__)
 

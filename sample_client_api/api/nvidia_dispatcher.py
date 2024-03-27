@@ -1,31 +1,15 @@
-from io import BytesIO
-
 from fastapi import Depends
-from requests_toolbelt import MultipartEncoder
-from starlette.responses import Response
-from wombo_utilities.interface.nvidia.nvidia_request_models import (
-    GuidanceNvidiaClientRequest,
-    ImageToImageNvidiaClientRequest,
-    InpaintNvidiaClientRequest,
-    InstructNvidiaClientRequest,
-    FaceswapNvidiaClientRequest,
-    FaceswapIpNvidiaClientRequest,
-    AvatarNvidiaClientRequest,
-    DiffusionNvidiaClientRequest,
-)
-
-from wombo.api.network_models import (
+from sample_client_api.api.network_models import (
     NvidiaOutput,
 )
-from wombo.bootup.auth import verify_token
-from wombo.config import (
+from sample_client_api.bootup.auth import verify_token
+from sample_client_api.config import (
     NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION,
     NVCF_UPSCALER_FUNCTION_ID,
 )
-from wombo.custom_router import WOMBOAPIRouter
-from wombo.nvidia import MIME_JPEG_CONTENT_TYPE
-from wombo.nvidia.nvidia_multi_client_request import multi_client_request
-from wombo.nvidia.nvidia_service import (
+from sample_client_api.custom_router import WOMBOAPIRouter
+from sample_client_api.nvidia.nvidia_multi_client_request import multi_client_request
+from sample_client_api.nvidia.nvidia_service import (
     process_image_to_image,
     process_inpaint,
     process_instruct,
@@ -37,6 +21,16 @@ from wombo.nvidia.nvidia_service import (
     process_upscaler,
     NvidiaUpscalerRequest,
     __upload_to_s3,
+)
+from sample_client_api.nvidia_request_models import (
+    GuidanceNvidiaClientRequest,
+    ImageToImageNvidiaClientRequest,
+    InpaintNvidiaClientRequest,
+    InstructNvidiaClientRequest,
+    FaceswapNvidiaClientRequest,
+    FaceswapIpNvidiaClientRequest,
+    AvatarNvidiaClientRequest,
+    DiffusionNvidiaClientRequest,
 )
 
 nvidia_dispatcher = WOMBOAPIRouter()

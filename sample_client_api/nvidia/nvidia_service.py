@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from starlette import status
 from wombo_utilities import get_logger_for_file
 from wombo_utilities.interface.art_inference.text_to_image_tasks import ImageInput
-from wombo_utilities.interface.nvidia.nvidia_request_models import (
+from sample_client_api.nvidia_request_models import (
     NvidiaClientRequest,
     InstructNvidiaClientRequest,
     InpaintNvidiaClientRequest,
@@ -27,11 +27,11 @@ from wombo_utilities.interface.nvidia.nvidia_request_models import (
 )
 
 from wombo import config
-from wombo.api.network_models import (
+from sample_client_api.api.network_models import (
     NvidiaOutput,
 )
-from wombo.bootup.nvidia_objects import IMMUTABLE_BOOTUP_MANAGER
-from wombo.config import (
+from sample_client_api.bootup.nvidia_objects import IMMUTABLE_BOOTUP_MANAGER
+from sample_client_api.config import (
     NVCF_INPAINT_FUNCTION_ID,
     NVIDIA_S3_BUCKET,
     NVCF_INSTRUCT_FUNCTION_ID,
@@ -39,8 +39,8 @@ from wombo.config import (
     NVCF_FACESWAP_IP_FUNCTION_ID,
     NVCF_AVATAR_FUNCTION_ID,
 )
-from wombo.model_constants import SD_XL_0_9
-from wombo.nvidia.client.nvidia_request import (
+from sample_client_api.model_constants import SD_XL_0_9
+from sample_client_api.nvidia.client.nvidia_request import (
     NvidiaRequest,
     STYLES_TO_NVIDIA_FUNCTIONS,
     STYLES_TO_IMG2IMG_NVIDIA_FUNCTIONS,
@@ -48,7 +48,7 @@ from wombo.nvidia.client.nvidia_request import (
     AssetLoader,
     asset_from_image,
 )
-from wombo.synth.synth_defaults import (
+from sample_client_api.synth.synth_defaults import (
     SDXL_BASE_STEPS,
     T2I_SCHEDULER_STEPS,
     I2I_SCHEDULER_STEPS,
@@ -58,7 +58,7 @@ from wombo.synth.synth_defaults import (
     INSTRUCT_IMAGE_CFG_MIN,
     INSTRUCT_IMAGE_CFG_MAX,
 )
-from wombo.synth.synth_spec_resolution_scaling import compute_base_dimensions
+from sample_client_api.synth.synth_spec_resolution_scaling import compute_base_dimensions
 
 log = get_logger_for_file(__name__)
 

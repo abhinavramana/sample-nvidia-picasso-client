@@ -8,12 +8,12 @@ from aiohttp import ClientResponse
 from wombo_utilities import get_logger_for_file
 
 from wombo import config
-from wombo.config import NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION
-from wombo.nvidia.client.nvidia_asset_client import (
+from sample_client_api.config import NVCF_SDXL_DIFFUSION_FUNCTION_ID_CALLED_WOMBO_DIFFUSION
+from sample_client_api.nvidia.client.nvidia_asset_client import (
     NvidiaAssetClient,
     is_response_status_valid,
 )
-from wombo.nvidia.client.nvidia_exceptions import (
+from sample_client_api.nvidia.client.nvidia_exceptions import (
     NvidiaPollException,
     NSFWRejectionException,
     NvidiaFunctionNotFoundException,
@@ -22,17 +22,17 @@ from wombo.nvidia.client.nvidia_exceptions import (
     NSFWRejectionSDXLException,
     NvidiaOOMException,
 )
-from wombo.nvidia.client.nvidia_request import (
+from sample_client_api.nvidia.client.nvidia_request import (
     NvidiaRequest,
     NvidiaRequestParameter,
     FACESWAP_FUNCTION_ID_SET,
 )
-from wombo.nvidia.client.nvidia_response_handler import (
+from sample_client_api.nvidia.client.nvidia_response_handler import (
     NvidiaPollTimeoutException,
     explicitly_sleep_for_minimum_polling_interval,
     handle_fulfilled_response,
 )
-from wombo.nvidia.nvidia_token_manager import NvidiaAuthConfig, NvidiaAuthTokenManager
+from sample_client_api.nvidia.nvidia_token_manager import NvidiaAuthConfig, NvidiaAuthTokenManager
 
 logger = get_logger_for_file(__name__)
 

@@ -1,8 +1,8 @@
 from wombo_utilities import get_logger_for_file
 
 from wombo import config
-from wombo.nvidia.nvidia_task_handler import NvidiaImageGenerationTaskHandler
-from wombo.nvidia.nvidia_token_manager import NvidiaAuthConfig
+from sample_client_api.nvidia.nvidia_task_handler import NvidiaImageGenerationTaskHandler
+from sample_client_api.nvidia.nvidia_token_manager import NvidiaAuthConfig
 
 logger = get_logger_for_file(__name__)
 

@@ -1,4 +1,4 @@
-from wombo.nvidia.client.nvidia_request import NvidiaRequest
+from sample_client_api.nvidia.client.nvidia_request import NvidiaRequest
 
 
 class NvidiaImageGenerationClientException(Exception):

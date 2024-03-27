@@ -5,16 +5,16 @@ from fastapi import HTTPException
 from starlette import status
 from wombo_utilities import get_logger_for_file
 
-from wombo.metrics import (
+from sample_client_api.metrics import (
     failed_tasks_counter,
     task_processing_time,
     successful_tasks_counter,
 )
-from wombo.nvidia.client.nvidia_image_generation_client import (
+from sample_client_api.nvidia.client.nvidia_image_generation_client import (
     NvidiaImageGenerationClient,
 )
-from wombo.nvidia.client.nvidia_request import NvidiaRequest
-from wombo.nvidia.nvidia_token_manager import NvidiaAuthConfig
+from sample_client_api.nvidia.client.nvidia_request import NvidiaRequest
+from sample_client_api.nvidia.nvidia_token_manager import NvidiaAuthConfig
 
 logger = get_logger_for_file(__name__)
 

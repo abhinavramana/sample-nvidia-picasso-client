@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from wombo_utilities import get_logger_for_file
 
 from wombo import config
-from wombo.nvidia import MIME_JPEG_CONTENT_TYPE
+from sample_client_api.nvidia import MIME_JPEG_CONTENT_TYPE
 
 log = get_logger_for_file(__name__)
 

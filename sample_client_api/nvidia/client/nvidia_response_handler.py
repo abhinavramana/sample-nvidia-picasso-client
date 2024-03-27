@@ -9,7 +9,7 @@ import aiohttp
 from wombo_utilities import get_logger_for_file
 
 from wombo import config
-from wombo.nvidia.client.nvidia_request import NvidiaRequest
+from sample_client_api.nvidia.client.nvidia_request import NvidiaRequest
 
 logger = get_logger_for_file(__name__)
 

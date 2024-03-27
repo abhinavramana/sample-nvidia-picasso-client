@@ -2,7 +2,7 @@ from typing import Any, Callable
 from fastapi import APIRouter as FastAPIRouter
 from fastapi.types import DecoratedCallable
 
-from wombo.custom_api_route import WOMBOAPIRoute
+from sample_client_api.custom_api_route import WOMBOAPIRoute
 
 
 class WOMBOAPIRouter(FastAPIRouter):
