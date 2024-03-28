@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from starlette.middleware import Middleware
 from sample_client_api.log_handling import get_logger_for_file
 from sample_client_api import config
-from sample_client_apiapi.nvidia_dispatcher import nvidia_dispatcher
+from sample_client_api.api.nvidia_dispatcher import nvidia_dispatcher
 from sample_client_api.bootup.nvidia_objects import IMMUTABLE_BOOTUP_MANAGER
 from sample_client_api.log_secret_configs import log_environment_configs
 from sample_client_api.middleware import LoggingMiddleware
