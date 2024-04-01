@@ -34,7 +34,7 @@ from sample_client_api.nvidia.client.nvidia_response_handler import (
 )
 from sample_client_api.nvidia.nvidia_token_manager import NvidiaAuthConfig, NvidiaAuthTokenManager
 
-NVCF_POLL_SECONDS = 60  # valid range is 0-300 seconds
+NVCF_POLL_SECONDS = "60"  # valid range is 0-300 seconds
 
 logger = get_logger_for_file(__name__)
 
@@ -171,8 +171,8 @@ class NvidiaImageGenerationClient:
                 }
             )
 
-        assets, data = await self.asset_handler.handle_assets(
-            self.client_session, nvidia_request, token, data
+        assets, data, headers = await self.asset_handler.handle_assets(
+            self.client_session, nvidia_request, token, data, headers
         )
 
         try:
