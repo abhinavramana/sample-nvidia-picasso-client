@@ -138,8 +138,8 @@ class NvidiaAssetClient:
         nvidia_request: NvidiaRequest,
         token: str,
         data: Dict[str, Any],
-        headers: Dict[str, Any]
-    ) -> Tuple[List[str], Dict[str, Any], Dict[str, Any]]:
+        headers: Dict[str, str]
+    ) -> Tuple[List[str], Dict[str, Any], Dict[str, str]]:
         tasks = [
             self.upload_asset(
                 session,
@@ -155,6 +155,6 @@ class NvidiaAssetClient:
         assets: List[str] = [*await asyncio.gather(*tasks)]
 
         if len(assets) > 0:
-            headers["NVCF-INPUT-ASSET-REFERENCES"] = assets
+            headers["NVCF-INPUT-ASSET-REFERENCES"] = ",".join(assets)
 
         return assets, data, headers
