@@ -62,23 +62,26 @@ NVIDIA_ZIP_IMAGE_FILE_NAME = "image.jpg"
 
 async def handle_fulfilled_response(
     session: aiohttp.ClientSession,
-    res_json,
+    response: aiohttp.ClientResponse,
     nvidia_client_request: NvidiaRequest,
     task_id: str,
+    req_id: str,
 ) -> Tuple[bytes, List[Any]]:
-    req_id = res_json["reqId"]
-    outputs = res_json.get("response", {}).get("outputs", [])
+    outputs = []
     image_data: bytes
 
-    if res_json.get("responseReference") is not None:  # zip file was sent back
+    if response.status == 302:  # zip file was sent back
         try:
-            url = res_json["responseReference"]
-            image_data = await convert_zipped_image_from_url_to_base64(session, url)
+            url = response.headers.get("Location")
+            image_data = await convert_zipped_image_from_url_to_base64(session,
+                                                                       url)
         except Exception as e:
             raise NvidiaImageZipRetrievalException(
-                req_id, e, nvidia_client_request, task_id, res_json
+                req_id, e, nvidia_client_request, task_id, await response.text()
             )
     else:
+        res_json = await response.json()
+        outputs = res_json.get("outputs", [])
         try:
             image_outputs = outputs[0]
             image_base64 = image_outputs["data"][0]  # Means outputs are not empty
