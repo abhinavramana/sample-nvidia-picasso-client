@@ -171,8 +171,8 @@ class NvidiaImageGenerationClient:
                 }
             )
 
-        assets, data = await self.asset_handler.handle_assets(
-            self.client_session, nvidia_request, token, data
+        assets, data, headers = await self.asset_handler.handle_assets(
+            self.client_session, nvidia_request, token, data, headers
         )
 
         try:

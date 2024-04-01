@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 import aiohttp
 from sample_client_api.log_handling import get_logger_for_file
@@ -96,7 +96,7 @@ class NvidiaAssetClient:
                         asset_id, response.status, await response.text(), url
                     )
 
-            data["requestBody"]["inputs"].append(
+            data["inputs"].append(
                 {
                     "name": field_name,
                     "shape": [1],
@@ -137,8 +137,9 @@ class NvidiaAssetClient:
         session: aiohttp.ClientSession,
         nvidia_request: NvidiaRequest,
         token: str,
-        data,
-    ):
+        data: Dict[str, Any],
+        headers: Dict[str, Any]
+    ) -> Tuple[List[str], Dict[str, Any], Dict[str, Any]]:
         tasks = [
             self.upload_asset(
                 session,
@@ -154,6 +155,6 @@ class NvidiaAssetClient:
         assets: List[str] = [*await asyncio.gather(*tasks)]
 
         if len(assets) > 0:
-            data["requestHeader"] = {"inputAssetReferences": assets}
+            headers["NVCF-INPUT-ASSET-REFERENCES"] = assets
 
-        return assets, data
+        return assets, data, headers
